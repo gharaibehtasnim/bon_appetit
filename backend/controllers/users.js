@@ -1,4 +1,5 @@
 const { genrateToken } = require("./config");
+const { OAuth2Client } = require("google-auth-library");
 
 const { pool } = require("../models/db");
 
@@ -114,8 +115,101 @@ const login = (req, res) => {
       });
     });
 };
+const checkGoogleUser = (req, res) => {
+  const token = req.body.credential;
+  const CLIENT_ID = req.body.clientId;
+  const client = new OAuth2Client(CLIENT_ID);
+  async function verify() {
+    const ticket = await client.verifyIdToken({
+      idToken: token,
+      audience: CLIENT_ID,
+    });
+    const payload = ticket.getPayload();
+    res.json(payload);
+  }
+  verify().catch((err) => {
+    if (err.keyPattern) {
+      res.status(409).json({
+        success: false,
+        message: `Email is already exist`,
+      });
+    } else {
+      res.status(500).json({
+        success: false,
+        message: `Server error`,
+        err: err.message,
+      });
+    }
+  });
+};
+const editUserInfo = (req, res) => {
+  const user_id = req.token.userId;
 
+  let { firstName, lastName,location } = req.body;
+  const data = [firstName, lastName,location, user_id];
+  const query = `UPDATE users SET 
+  firstName = COALESCE($1,firstName), 
+  lastName = COALESCE($2, lastName), 
+  location = COALESCE($3, location), 
+  updated_at=NOW() 
+  WHERE user_id=$4 RETURNING *;`;
+
+  pool
+    .query(query, data)
+    .then((result) => {
+    
+      if (result.rows.length === 0) {
+        return res.status(200).json({
+          success: false,
+          message: `no data found`,
+        });
+      } else {
+        res.status(200).json({
+          success: true,
+          message: `user's info updated sucessfully `,
+          result: result.rows[0],
+        });
+      }
+    })
+    .catch((err) => {
+      res.status(500).json({
+        success: false,
+        message: "Server error",
+        err: err,
+      });
+    });
+};
+const profileInfo = (req, res) => {
+  const user_id = req.token.userId;
+  const query = "SELECT * FROM users WHERE user_id=$1";
+  pool
+    .query(query, [user_id])
+    .then((result) => {
+      if (result.rows.length === 0) {
+        res.status(200).json({
+          success: false,
+          message: `The user: ${user_id} has no info`,
+        });
+      } else {
+        res.status(200).json({
+          success: true,
+          message: `All info for the user: ${user_id}`,
+          info: result.rows[0],
+        });
+      }
+    })
+    .catch((err) => {
+      res.status(500).json({
+        success: false,
+        message: "Server error",
+        err: err,
+      });
+    });
+};
 module.exports = {
   register,
   login,
+  checkGoogleUser,
+  profileInfo,
+  editUserInfo
 };
