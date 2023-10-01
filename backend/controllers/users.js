@@ -147,11 +147,11 @@ const editUserInfo = (req, res) => {
 
   let { firstName, lastName,location } = req.body;
   const data = [firstName, lastName,location, user_id];
+  console.log(data)
   const query = `UPDATE users SET 
   firstName = COALESCE($1,firstName), 
   lastName = COALESCE($2, lastName), 
-  location = COALESCE($3, location), 
-  updated_at=NOW() 
+  location = COALESCE($3, location) 
   WHERE user_id=$4 RETURNING *;`;
 
   pool

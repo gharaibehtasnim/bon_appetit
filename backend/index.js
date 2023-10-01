@@ -6,9 +6,11 @@ const port = process.env.PORT || 3000;
 require("./models/db");
 const productsRouter = require("./routes/products");
 const usersRouter = require("./routes/users");
+const cartRouter=require("./routes/cart")
 
 app.use("/products", productsRouter);
 app.use("/users", usersRouter);
+app.use("/cart", cartRouter);
 
 app.get("/", (req, res) => res.send("Hello World!"));
 
