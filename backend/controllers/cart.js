@@ -24,17 +24,15 @@ const addToCart = (req, res) => {
     });
 };
 
-const getAllProductsInCart = (req, res) => {
-    const user=req.token.userId;
-const query = `SELECT *
-FROM products 
-INNER JOIN users ON nestedcomments.user_id = users.user_id
-WHERE nestedcomments.is_deleted=0 AND nestedcomments.post_id =$1
-AND nestedcomments.comment_id=$2
-ORDER BY nestedcomments.created_at DESC
+const viewCart = (req, res) => {
+  const user=req.token.userId;
+    console.log(user)
+const query = `SELECT products.*,user_id FROM cart 
+INNER JOIN products ON products.product_id= cart.product_id
+WHERE user_id=$1
 `;
   pool
-    .query(query, [])
+    .query(query, [user])
     .then((result) => {
       res.status(201).json({
         success: true,
@@ -49,33 +47,12 @@ ORDER BY nestedcomments.created_at DESC
     });
 };
 
-const UpdateProduct = (req, res) => {
-  const id = req.params.id;
-  const { title, price, category } = req.body;
-  const values = [title, price, category, id];
-  const query = `UPDATE products SET title=$1, price=$2,category=$3 WHERE id=$4 RETURNING *`;
-  // COALESCE(null,null,null,null,"title",null,,,,)
-  // IIF(conditionm,yes,no,)
-  pool
-    .query(query, values)
-    .then((result) => {
-      res.status(201).json({
-        success: true,
-        product: result.rows,
-      });
-    })
-    .catch((err) => {
-      res.status(500).json({
-        success: false,
-        err,
-      });
-    });
-};
 
-const deleteProduct = (req, res) => {
+
+const deleteProductInCart = (req, res) => {
   const id = req.params.id;
 
-  const query = `UPDATE products SET is_deleted=1 WHERE id = $1 RETURNING *`;
+  const query = `Delete from cart where product_id=$1 RETURNING *`;
 
   pool
     .query(query, [id])
@@ -92,6 +69,6 @@ const deleteProduct = (req, res) => {
       });
     });
 };
-module.exports = { addToCart, 
-    //getAllProducts, UpdateProduct, deleteProduct 
+module.exports = { addToCart, viewCart,deleteProductInCart
+    
 };

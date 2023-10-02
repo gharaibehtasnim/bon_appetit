@@ -7,10 +7,13 @@ require("./models/db");
 const productsRouter = require("./routes/products");
 const usersRouter = require("./routes/users");
 const cartRouter=require("./routes/cart")
+const favouriteRouter=require("./routes/favourite")
 
 app.use("/products", productsRouter);
 app.use("/users", usersRouter);
 app.use("/cart", cartRouter);
+app.use("/fav", favouriteRouter);
+
 
 app.get("/", (req, res) => res.send("Hello World!"));
 

@@ -19,6 +19,24 @@ CREATE TABLE products (
     created_at TIMESTAMP DEFAULT NOW(),
     is_deleted SMALLINT DEFAULT 0
 );
+CREATE TABLE favourite (
+  favourite_id SERIAL NOT NULL,
+  user_id INT,
+  product_id INT,
+  created_at TIMESTAMP DEFAULT NOW(),
+  FOREIGN KEY (user_id) REFERENCES users(user_id),
+  FOREIGN KEY (product_id) REFERENCES products(product_id),
+  PRIMARY KEY (favourite_id)
+);
+CREATE TABLE cart (
+  cart_id SERIAL NOT NULL,
+  user_id INT,
+  product_id INT,
+  created_at TIMESTAMP DEFAULT NOW(),
+  FOREIGN KEY (user_id) REFERENCES users(user_id),
+  FOREIGN KEY (product_id) REFERENCES products(product_id),
+  PRIMARY KEY (cart_id)
+);
 /*
 postgres://cvxgjoog:P4jzFK08KpJX46MbaA9N3mLvtWb4vEOu@tai.db.elephantsql.com/cvxgjoog
 */
